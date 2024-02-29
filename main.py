@@ -2,6 +2,8 @@ from typing import Union
 
 from fastapi import FastAPI
 from pydantic import BaseModel
+from fastapi import HTTPException
+from pydantic import EmailStr
 
 from database import get_database_connection
 
@@ -11,9 +13,22 @@ class User(BaseModel):
     name: str
     email: str 
 
+# @app.post("/users")
+# async def create_user(user: User):
+#     # save user to database
+#     connection = get_database_connection()
+#     cursor = connection.cursor()
+#     query = "INSERT INTO users (name, email) VALUES (%s, %s)"
+#     values = (user.name, user.email)
+#     cursor.execute(query, values)
+#     connection.commit()
+#     connection.close()
+#     return {"message": "user created successfully"}
+
 @app.post("/users")
 async def create_user(user: User):
-    # save user to database
+    if not user.email.endswith("@example.com"):
+        raise HTTPException(status_code=400, detail="Email must be example.com")
     connection = get_database_connection()
     cursor = connection.cursor()
     query = "INSERT INTO users (name, email) VALUES (%s, %s)"
@@ -65,6 +80,10 @@ async def delete_user(user_id: int):
     connection.commit()
     connection.close()
     return {"message": "user deleted successfully"}
+
+
+# adding code for email validation and error handling
+
 
 # Run the application
 # uvicorn main:app --reload
