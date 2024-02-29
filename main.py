@@ -7,7 +7,6 @@ from database import get_database_connection
 
 app = FastAPI()
 
-
 class User(BaseModel):
     name: str
     email: str 
@@ -23,7 +22,6 @@ async def create_user(user: User):
     connection.commit()
     connection.close()
     return {"message": "user created successfully"}
-
 
 @app.get("/users/{user_id}")
 async def get_user(user_id: int):
