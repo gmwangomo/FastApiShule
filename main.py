@@ -4,6 +4,7 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 from fastapi import HTTPException
 from pydantic import EmailStr
+from passlib.context import CryptContext
 
 from database import get_database_connection
 
@@ -11,29 +12,21 @@ app = FastAPI()
 
 class User(BaseModel):
     name: str
-    email: str
-    password: hash 
+    email: EmailStr
+    password: str 
 
-# @app.post("/users")
-# async def create_user(user: User):
-#     # save user to database
-#     connection = get_database_connection()
-#     cursor = connection.cursor()
-#     query = "INSERT INTO users (name, email) VALUES (%s, %s)"
-#     values = (user.name, user.email)
-#     cursor.execute(query, values)
-#     connection.commit()
-#     connection.close()
-#     return {"message": "user created successfully"}
 
+# adding password hashing
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+ 
 @app.post("/users")
 async def create_user(user: User):
     if not user.email.endswith("@gmail.com"):
         raise HTTPException(status_code=400, detail="Email must be @gmail.com")
     connection = get_database_connection()
     cursor = connection.cursor()
-    query = "INSERT INTO users (name, email) VALUES (%s, %s)"
-    values = (user.name, user.email)
+    query = "INSERT INTO users (name, email, password) VALUES (%s, %s, %s)"
+    values = (user.name, user.email, pwd_context.hash(user.password))
     cursor.execute(query, values)
     connection.commit()
     connection.close()
@@ -64,8 +57,8 @@ async def get_users():
 async def update_user(user_id: int, user: User):
     connection = get_database_connection()
     cursor = connection.cursor()
-    query = "UPDATE users SET name = %s, email = %s WHERE id = %s"
-    values = (user.name, user.email, user_id)
+    query = "UPDATE users SET name = %s, email = %s, password = %s WHERE id = %s"  # Removed the comma before WHERE
+    values = (user.name, user.email, pwd_context.hash(user.password), user_id)
     cursor.execute(query, values)
     connection.commit()
     connection.close()
@@ -83,9 +76,9 @@ async def delete_user(user_id: int):
     return {"message": "user deleted successfully"}
 
 
-# adding code for email validation and error handling
-
 
 # Run the application
 # uvicorn main:app --reload
 # The --reload flag will automatically reload the server when you make changes to the code.
+# pip install "passlib[bcrypt]"      useful for password hashing in the application
+# useful for email validation in the application pip install pydantic[email]
