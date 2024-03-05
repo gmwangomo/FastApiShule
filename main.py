@@ -11,7 +11,8 @@ app = FastAPI()
 
 class User(BaseModel):
     name: str
-    email: str 
+    email: str
+    password: hash 
 
 # @app.post("/users")
 # async def create_user(user: User):
@@ -27,8 +28,8 @@ class User(BaseModel):
 
 @app.post("/users")
 async def create_user(user: User):
-    if not user.email.endswith("@example.com"):
-        raise HTTPException(status_code=400, detail="Email must be example.com")
+    if not user.email.endswith("@gmail.com"):
+        raise HTTPException(status_code=400, detail="Email must be @gmail.com")
     connection = get_database_connection()
     cursor = connection.cursor()
     query = "INSERT INTO users (name, email) VALUES (%s, %s)"
