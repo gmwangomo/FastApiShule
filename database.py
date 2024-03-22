@@ -4,6 +4,6 @@ def get_database_connection():
     return mysql.connector.connect(
         host="localhost",
         user = "root",
-        password="Mwangomo#1",
+        password="",
         database="fastApiShule"
     )
